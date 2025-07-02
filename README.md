@@ -1,70 +1,40 @@
-# GreenSquare Background Agent
+# Daily Green Check Bot
 
-A simple, extensible background agent that can run continuously and execute scheduled tasks.
+Automated GitHub Action that creates one commit per day at a random time between 08:00 and 20:00 Pacific Time to maintain green squares on your contribution graph.
 
-## Features
+## How it works
 
-- Continuous background execution
-- Configurable task scheduling
-- Graceful shutdown handling
-- Comprehensive logging
-- Error handling and recovery
-- Thread-safe operation
+- **Daily trigger**: Runs at 14:50 UTC (07:50 PT) via GitHub Actions cron schedule
+- **Random timing**: Sleeps 0-12 hours randomly to commit between 08:00-20:00 PT
+- **Smart sleep splitting**: GitHub limits runner timeouts to 6h; the script splits long sleeps accordingly
+- **Timezone aware**: Handles PST/PDT automatically using luxon
+- **Clean commits**: Sets proper git author/committer dates for accurate contribution graph timing
 
-## Installation
+## Files
 
-1. Clone this repository
-2. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
+- `.github/workflows/daily.yml` - GitHub Action workflow
+- `src/commit.js` - Node script that touches heartbeat.md and commits
+- `package.json` - Dependencies (luxon for timezone handling)
+- `heartbeat.md` - File that gets updated each run
 
-## Usage
+## Testing
 
-Run the background agent:
+Run locally without pushing:
 ```bash
-python background_agent.py
+npm install
+npm test
 ```
 
-The agent will start and begin executing the configured tasks at their specified intervals.
+## Setup
 
-## Configuration
+1. Push this repo to GitHub
+2. Enable Actions in repo settings
+3. Test manually using the "workflow_dispatch" button in Actions tab
+4. Verify permissions allow the bot to commit and push
 
-The script includes example tasks:
-- **Health Check**: Runs every 30 seconds
-- **System Status**: Reports CPU and memory usage every minute
-- **Periodic Cleanup**: Runs cleanup tasks every 5 minutes
+## Important Notes
 
-### Adding Custom Tasks
-
-To add your own tasks, create a function and add it to the agent:
-
-```python
-def my_custom_task():
-    # Your task logic here
-    print("Executing custom task")
-
-# Add to agent with desired interval (in seconds)
-agent.add_task(my_custom_task, interval=120)  # Every 2 minutes
-```
-
-## Logs
-
-The agent logs to both:
-- Console output (stdout)
-- Log file (`agent.log`)
-
-## Stopping the Agent
-
-The agent handles graceful shutdown via:
-- Ctrl+C (SIGINT)
-- Kill signals (SIGTERM)
-
-## Extending the Agent
-
-The `BackgroundAgent` class is designed to be easily extended. You can:
-- Add more sophisticated task scheduling
-- Implement task priorities
-- Add configuration file support
-- Integrate with external systems
-- Add monitoring and alerting capabilities 
+- Keep repo private - GitHub's spam policy discourages automated activity in public repos
+- Uses only built-in GITHUB_TOKEN, no additional secrets needed
+- Disable workflow in Actions tab to pause the bot
+- First run should be tested manually to ensure permissions work 

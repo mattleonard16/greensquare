@@ -1,0 +1,36 @@
+name: Daily green check
+on:
+  schedule:
+    # Kick off 07:50 PT daily (14:50 UTC) – safely inside the target window
+    - cron: '50 14 * * *'
+  workflow_dispatch:
+
+jobs:
+  commit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+      - name: Install Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Random sleep (≤ 12 h, but ≤ 6 h per runner limit)
+        id: sleeper
+        run: |
+          RAND=$(( RANDOM % 43200 ))      # 0-43199 seconds (12 h)
+          echo "total_sleep=$RAND" >> $GITHUB_OUTPUT
+          FIRST=$(( RAND > 21600 ? 21600 : RAND )) # <=6h first chunk
+          SECOND=$(( RAND - FIRST ))
+          echo "Sleeping first $FIRST s, second $SECOND s"
+          sleep $FIRST
+          if [ $SECOND -gt 0 ]; then sleep $SECOND; fi
+      - name: Run commit script
+        env:
+          TZ: America/Los_Angeles
+        run: |
+          npm ci
+          node src/commit.js
+      - name: Push changes
+        run: |
+          git push origin HEAD 

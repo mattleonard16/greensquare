@@ -1,0 +1,16 @@
+{
+  "name": "daily-green-check",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "GitHub Action bot for daily green squares",
+  "main": "src/commit.js",
+  "scripts": {
+    "test": "node src/commit.js"
+  },
+  "dependencies": {
+    "luxon": "^3.4.4"
+  },
+  "keywords": ["github-actions", "bot", "commit"],
+  "author": "Green Square Bot",
+  "license": "MIT"
+} 
